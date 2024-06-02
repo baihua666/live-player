@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <application
+        tools:ignore="GoogleAppIndexingWarning,UnusedAttribute">
+
+        <service
+            android:name=".ijkplayer.services.MediaPlayerService"
+            android:enabled="false"
+            android:exported="false"
+            android:icon="@mipmap/ic_launcher"
+            android:label="player" >
+        </service>
+    </application>
+
+</manifest>
