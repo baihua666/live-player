@@ -5,6 +5,9 @@ import android.graphics.PixelFormat
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.opengl.Matrix
+import android.os.Build
+import androidx.annotation.RequiresApi
+import com.example.player.BuildConfig
 import com.example.player.gles.Drawable2dTarget
 import com.example.player.gles.GlUtil
 import com.example.player.gles.Texture2dProgram
@@ -19,6 +22,8 @@ class LayerRender: GLSurfaceView.Renderer {
     private var texProgram: Texture2dProgram? = null
     private val displayProjectionMatrix = FloatArray(16)
 
+    public var backgroundColor: Color? = null
+
     fun startPreview(surfaceView: GLSurfaceView) {
         this.surfaceView = surfaceView
         surfaceView.setEGLContextClientVersion(2)
@@ -26,12 +31,18 @@ class LayerRender: GLSurfaceView.Renderer {
         surfaceView.renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
 
         surfaceView.holder.setFormat(PixelFormat.RGBA_8888)
-        surfaceView.setZOrderOnTop(true)
+//        surfaceView.setZOrderOnTop(true)
         surfaceView.setBackgroundColor(Color.TRANSPARENT)
 
         surfaceView.requestRender()
     }
 
+    fun stopPreview() {
+        surfaceView?.queueEvent {
+            surfaceView?.setRenderer(null)
+            surfaceView?.renderMode = GLSurfaceView.RENDERMODE_WHEN_DIRTY
+        }
+    }
 
 
     fun drawDrawable2DTarget(target: Drawable2dTarget) {
@@ -89,19 +100,33 @@ class LayerRender: GLSurfaceView.Renderer {
         listener?.onSurfaceChanged(gl, width, height)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onDrawFrame(gl: GL10?) {
         GlUtil.checkGlError("draw start")
 
 
         // Clear to a non-black color to make the content easily differentiable from
         // the pillar-/letter-boxing.
-        GLES20.glClearColor(0.2f, 0.2f, 0.2f, 1.0f)
+        if (backgroundColor != null) {
+            GLES20.glClearColor(backgroundColor!!.red(), backgroundColor!!.green(), backgroundColor!!.blue(), backgroundColor!!.alpha())
+        }
+        else {
+            GLES20.glClearColor(0f, 0f, 0f, 1.0f)
+        }
+
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
 
 
         // Textures may include alpha, so turn blending on.
-        GLES20.glEnable(GLES20.GL_BLEND)
-        GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+//        debug
+        if (BuildConfig.DEBUG) {
+
+        }
+        else {
+            GLES20.glEnable(GLES20.GL_BLEND)
+            GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+        }
+
 
         listener?.onDrawFrame(gl)
 

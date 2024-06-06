@@ -23,4 +23,18 @@ open class BaseLayerImpl : BaseLayer() {
     open fun stop() {
 
     }
+
+    internal open fun updatePosition(x: Int, y: Int) {
+        this.x = x
+        this.y = y
+    }
+
+    internal open fun updateSize(layerWith: Int, layerHeight: Int) {
+        width = layerWith
+        height = layerHeight
+    }
+
+    internal open fun updateRotation(rotate: Int) {
+        this.rotate = rotate
+    }
 }

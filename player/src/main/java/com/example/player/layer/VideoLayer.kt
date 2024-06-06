@@ -29,25 +29,20 @@ open class VideoLayer : TextureLayer() {
                 //视频是反的？先特殊处理一下
                 targetDrawable?.isMirrorY = true
 
-                if (x == null) {
-                    x = (previewWidth / 2)
-                }
-                if (y == null) {
-                    y = (previewHeight / 2)
-                }
-                targetDrawable?.setPosition(x!!.toFloat(), y!!.toFloat())
-
             }
 
             override fun onSizeChanged(width: Int, height: Int) {
-                if (this@VideoLayer.width == null) {
-                    this@VideoLayer.width = width
-                }
-                if (this@VideoLayer.height == null) {
-                    this@VideoLayer.height = height
-                }
+//                if (this@VideoLayer.width == null) {
+//                    this@VideoLayer.width = width
+//                }
+//                if (this@VideoLayer.height == null) {
+//                    this@VideoLayer.height = height
+//                }
 
-                targetDrawable?.setScale(width.toFloat(), height.toFloat())
+                updateSize(width, height)
+
+
+//                targetDrawable?.setScale(width.toFloat(), height.toFloat())
             }
 
             override fun onDrawFrame(textureId: Int): Int {

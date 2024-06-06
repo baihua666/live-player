@@ -1,7 +1,13 @@
 package com.example.player.studio
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.opengl.GLSurfaceView
+import android.widget.FrameLayout
+import com.example.player.layer.BaseLayerImpl
+import com.example.player.layer.BitmapLayer
+import com.example.player.layer.ImageLayer
 import com.example.player.layer.VideoLayer
 
 
@@ -14,11 +20,11 @@ interface LayerStudio {
     }
 
 
-    open fun setListener(listener: LayerStudioListener)
+    fun setListener(listener: LayerStudioListener)
 
-    open fun startPreview(surfaceView: GLSurfaceView, context: Context)
+    fun startPreview(context: Context, surfaceView: GLSurfaceView, actionView: FrameLayout?)
 //
-//    open fun stopPreview()
+    fun stopPreview()
 //
 //    /**
 //     * 设置预览显示类型
@@ -32,11 +38,18 @@ interface LayerStudio {
 //     */
 //    open fun setFrame(frame: Frame)
 //
-//    open fun setBackgroundColor(red: Int, green: Int, blue: Int)
+    fun setBackgroundColor(color: Color)
 //
 //    open fun setBackgroundImage(filePath: String?)
 //
-//    open fun addImageLayer(layer: ImageLayer)
+
+    fun releaseLayer(layer: BaseLayerImpl)
+
+    fun showActionView(layer: BaseLayerImpl)
+
+    fun addImageLayer(filePath: String) : ImageLayer?
+
+    fun addBitmapLayer(bitmap: Bitmap) : BitmapLayer?
 //
     fun addVideoLayer(filePath: String) : VideoLayer?
 //

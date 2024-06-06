@@ -16,7 +16,13 @@ open class BaseLayer {
     var y: Int? = null
     var width: Int? = null
     var height: Int? = null
-//    var scaleX: Float? = null
     var rotate: Int? = null
 
+    fun getCenterX(): Int {
+        return x!! + width!! / 2
+    }
+
+    fun getCenterY(): Int {
+        return y!! + height!! / 2
+    }
 }
