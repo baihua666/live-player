@@ -37,6 +37,13 @@ open class TextureLayer : BaseLayerImpl() {
         Log.d("TextureLayer", "updateRotation: $rotate")
     }
 
+    fun updateDrawable() {
+        targetDrawable?.setScale(width!!.toFloat(), height!!.toFloat())
+        targetDrawable?.setPosition(getCenterX().toFloat(), getCenterY().toFloat())
+        targetDrawable?.setScale(width!!.toFloat(), height!!.toFloat())
+        targetDrawable?.rotation = (rotate?: 0).toFloat()
+    }
+
     private fun updateDrawablePosition() {
         if (x == null || y == null || width == null || height == null) {
             return

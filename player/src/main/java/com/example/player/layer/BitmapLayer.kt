@@ -14,7 +14,7 @@ open class BitmapLayer : TextureLayer() {
         targetDrawable = Drawable2dTarget(drawable2d)
 //        targetDrawable?.setColor(0.9f, 0.1f, 0.1f)
         targetDrawable?.setTexture(mImageTexture)
-        targetDrawable?.setScale(bitmap.width.toFloat(), bitmap.height.toFloat())
-        updateSize(bitmap.width, bitmap.height)
+
+        updateDrawable()
     }
 }

@@ -7,7 +7,6 @@ import android.opengl.GLSurfaceView
 import android.opengl.Matrix
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.example.player.BuildConfig
 import com.example.player.gles.Drawable2dTarget
 import com.example.player.gles.GlUtil
 import com.example.player.gles.Texture2dProgram
@@ -119,13 +118,14 @@ class LayerRender: GLSurfaceView.Renderer {
 
         // Textures may include alpha, so turn blending on.
 //        debug
-        if (BuildConfig.DEBUG) {
-
-        }
-        else {
+//        if (BuildConfig.DEBUG) {
+//
+//        }
+//        else
+//        {
             GLES20.glEnable(GLES20.GL_BLEND)
             GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
-        }
+//        }
 
 
         listener?.onDrawFrame(gl)

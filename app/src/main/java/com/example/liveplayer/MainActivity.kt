@@ -50,13 +50,16 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
         }
         layerManager.setBackgroundColor(color)
 
-}
+    }
 
     private fun addVideoLayer() {
         var filePath: String = FileUtil.copyAssetFileToCache(this, "test1.mp4")
         var layer = layerManager.addVideoLayer(filePath)
+        layerManager.showActionView(layer!!)
 
-        filePath = FileUtil.copyAssetFileToCache(this, "green_video.mp4")
+//        filePath = FileUtil.copyAssetFileToCache(this, "green_video.mp4")
+        filePath = FileUtil.copyAssetFileToCache(this, "green_test1.mp4")
+
         layer = layerManager.addVideoLayer(filePath)
         layer?.enableMattingGreen = true
     }
@@ -65,7 +68,7 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
         val bitmap = BitmapFactory.decodeResource(
             resources, R.drawable.ic_theme_play_arrow
         )
-        var layer = layerManager.addBitmapLayer(bitmap)
+        val layer = layerManager.addBitmapLayer(bitmap)
         layer?.let {
             layerManager.showActionView(it)
         }
@@ -73,8 +76,8 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
     }
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-//            addVideoLayer()
-            addImageLayer()
+            addVideoLayer()
+//            addImageLayer()
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {

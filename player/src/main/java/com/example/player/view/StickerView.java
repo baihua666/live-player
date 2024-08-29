@@ -83,6 +83,8 @@ public class StickerView extends BaseImageView {
     private float MIN_SCALE = 0.5f;
 
     private float MAX_SCALE = 1.2f;
+//    private float MAX_SCALE = 2.0f;
+
 
     private double halfDiagonalLength;
 
@@ -297,10 +299,10 @@ public class StickerView extends BaseImageView {
                 MIN_SCALE = 1.0f * minHeight / mBitmap.getHeight();
             }
 
-            if (mBitmap.getHeight() > mScreenwidth) {
+            if (mBitmap.getHeight() > mScreenHeight) {
                 MAX_SCALE = 1;
             } else {
-                MAX_SCALE = 1.0f * mScreenwidth / mBitmap.getHeight();
+                MAX_SCALE = 1.0f * mScreenHeight / mBitmap.getHeight();
             }
         }
 
@@ -534,6 +536,9 @@ public class StickerView extends BaseImageView {
      * @return
      */
     private boolean isInBitmap(MotionEvent event) {
+        if (this.mBitmap == null) {
+            return false;
+        }
         float[] arrayOfFloat1 = new float[9];
         this.matrix.getValues(arrayOfFloat1);
         //左上角

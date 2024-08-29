@@ -21,10 +21,17 @@ class LayerActionLayout(frameLayout: FrameLayout) : StickerView.OperationListene
         this.frameLayout = frameLayout
     }
 
+    fun actionViewLayer() : BaseLayerImpl? {
+        if (this.inEditView != null) {
+            return this.inEditView!!.tag as BaseLayerImpl
+        }
+        return null
+    }
 
     fun showActionView(layer: BaseLayerImpl) {
         if (this.inEditView != null) {
             this.inEditView!!.setInEdit(false)
+            frameLayout.removeView(this.inEditView!!)
             this.inEditView = null
         }
         val view = StickerView(frameLayout.context)
@@ -41,10 +48,13 @@ class LayerActionLayout(frameLayout: FrameLayout) : StickerView.OperationListene
         frameLayout.addView(view, layoutParams)
         frameLayout.bringChildToFront(view)
 
-        view.posX = layer.x!!.toFloat()
-        view.posY = layer.y!!.toFloat()
+        view.posX = (layer.x ?: 0).toFloat()
+        view.posY = (layer.y ?: 0).toFloat()
 
-        val bitmap = Bitmap.createBitmap(layer.width!!, layer.height!!, Bitmap.Config.ARGB_8888)
+        if (layer.width != null && layer.height != null) {
+            val bitmap = Bitmap.createBitmap(layer.width ?: 0, layer.height ?: 0, Bitmap.Config.ARGB_8888)
+            view.bitmap = bitmap
+        }
 
 //        debug
 //        val canvas = Canvas(bitmap)
@@ -52,7 +62,6 @@ class LayerActionLayout(frameLayout: FrameLayout) : StickerView.OperationListene
 
 //        view.background = ColorDrawable(0x00000066.toInt());
 
-        view.bitmap = bitmap
 
         this.inEditView = view
     }

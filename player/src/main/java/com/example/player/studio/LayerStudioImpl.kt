@@ -3,11 +3,13 @@ package com.example.player.studio
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.os.Handler
 import android.os.Looper
 import android.widget.FrameLayout
 import com.example.player.BuildConfig
+import com.example.player.gles.GlUtil
 import com.example.player.layer.BaseLayer
 import com.example.player.layer.BaseLayerImpl
 import com.example.player.layer.BitmapLayer
@@ -17,6 +19,8 @@ import com.example.player.layer.VideoLayer
 import com.example.player.view.LayerActionLayout
 import com.tencent.mars.xlog.Log
 import java.io.File
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -88,7 +92,16 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
             assert(false) { "File not found: $filePath" }
             return null
         }
-        val layer = VideoLayer()
+        var layer:VideoLayer? = null
+        layer = object : VideoLayer() {
+            override fun onContentRectReady() {
+                super.onContentRectReady()
+                //仍然在显示当前layer，没有被其它layer覆盖
+                if (actionView?.actionViewLayer() == layer) {
+                    showActionView(layer!!)
+                }
+            }
+        }
         layer.filePath = filePath
         addVideoPlayer(layer)
         synchronized(layerList) {
@@ -100,9 +113,11 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
 
     override fun addBitmapLayer(bitmap: Bitmap) : BitmapLayer? {
         val layer = BitmapLayer()
+        layer.updateSize(bitmap.width, bitmap.height)
+        layer.updateCenterPosition(previewWidth / 2, previewHeight / 2)
+
         runOnGLThread {
             layer.configure(bitmap)
-            layer.updateCenterPosition(previewWidth / 2, previewHeight / 2)
         }
 
         synchronized(layerList) {
@@ -131,6 +146,14 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
     override fun showActionView(layer: BaseLayerImpl) {
         runOnMainThread {
             actionView?.showActionView(layer)
+            if (layer.contentRectReady()) {
+
+            }
+            else {
+                assert(layer is VideoLayer) { "Content rect not ready: $layer" }
+
+            }
+
         }
     }
 
@@ -202,6 +225,7 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
                     drawTextureLayer(layer)
                 }
             }
+            readPixels()
         }
 
 
@@ -221,5 +245,36 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
             }
             render!!.drawDrawable2DTarget(it)
         }
+    }
+
+    private fun readPixels() {
+        val width: Int = previewWidth
+        val height: Int = previewHeight
+        val buf = ByteBuffer.allocateDirect(width * height * 4)
+        buf.order(ByteOrder.LITTLE_ENDIAN)
+
+        val startWhen = System.nanoTime()
+        // Try to ensure that rendering has finished.
+        GLES20.glFinish()
+        GLES20.glReadPixels(
+            0, 0, width, height,
+            GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, buf
+        )
+        // Time individual extraction.  Ideally we'd be timing a bunch of these calls
+        // and measuring the aggregate time, but we want the isolated time, and if we
+        // just read the same buffer repeatedly we might get some sort of cache effect.
+
+
+        var totalTime = System.nanoTime() - startWhen
+        android.util.Log.d("glReadPixels:", "ms:" + totalTime / 1000)
+
+        val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        bmp.copyPixelsFromBuffer(buf)
+        bmp.recycle()
+
+        GlUtil.checkGlError("glReadPixels")
+        buf.rewind()
+
+
     }
 }

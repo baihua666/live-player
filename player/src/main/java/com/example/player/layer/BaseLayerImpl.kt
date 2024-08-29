@@ -2,6 +2,7 @@ package com.example.player.layer
 
 import org.json.JSONObject
 
+
 open class BaseLayerImpl : BaseLayer() {
 
 //    var inEdit = false
@@ -21,6 +22,20 @@ open class BaseLayerImpl : BaseLayer() {
     }
 
     open fun stop() {
+
+    }
+
+    fun contentRectReady() : Boolean {
+        return width != null && height != null && x != null && y != null
+    }
+
+    fun checkContentRectReady() {
+        if (width != null && height != null && x != null && y != null) {
+            onContentRectReady()
+        }
+    }
+
+    open fun onContentRectReady() {
 
     }
 

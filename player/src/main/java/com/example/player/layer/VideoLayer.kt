@@ -40,6 +40,8 @@ open class VideoLayer : TextureLayer() {
 //                }
 
                 updateSize(width, height)
+                updateCenterPosition(previewWidth /2, previewHeight /2)
+                checkContentRectReady()
 
 
 //                targetDrawable?.setScale(width.toFloat(), height.toFloat())
