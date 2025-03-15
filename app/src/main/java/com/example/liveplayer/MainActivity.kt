@@ -11,7 +11,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.liveplayer.layer.LayerManager
+import com.example.player.layer.BaseLayerImpl
 import com.example.player.studio.LayerStudioListener
+import java.util.Timer
+import java.util.TimerTask
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -21,6 +24,7 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
 
     private lateinit var layerManager: LayerManager
     private lateinit var actionView:FrameLayout
+    private var testLayer: BaseLayerImpl? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +36,19 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
             insets
         }
         initPlayer()
+    }
+
+    private fun startTest() {
+        testRotation()
+    }
+
+    private fun testVideo() {
+        addVideoLayer()
+    }
+
+    private fun testRotation() {
+        addImageLayer()
+        startTimer()
     }
 
 //    @RequiresApi(Build.VERSION_CODES.O)
@@ -68,19 +85,32 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
         val bitmap = BitmapFactory.decodeResource(
             resources, R.drawable.ic_theme_play_arrow
         )
-        val layer = layerManager.addBitmapLayer(bitmap)
-        layer?.let {
+        testLayer = layerManager.addBitmapLayer(bitmap)
+        testLayer?.color = Color.argb(100, 0, 255, 0)
+        testLayer?.let {
             layerManager.showActionView(it)
         }
 
     }
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-            addVideoLayer()
-//            addImageLayer()
+        startTest()
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
 
+    }
+
+    fun startTimer() {
+        testLayer?.rotate = 0
+        Timer().schedule(object : TimerTask() {
+            override fun run() {
+                var rotate = testLayer!!.rotate!!.plus(10)
+                if (rotate >= 360) {
+                    rotate = 0
+                }
+                testLayer?.updateRotation(rotate)
+            }
+        }, 100, 100)
     }
 }

@@ -17,6 +17,8 @@
 package com.example.player.gles;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.GLES30;
 import android.opengl.GLUtils;
@@ -162,7 +164,7 @@ public class GlUtil {
         return textureHandle;
     }
 
-    public static int createImageTexture(Bitmap bitmap) {
+    public static int createImageTexture(Bitmap bitmap, int color) {
         int[] textureHandles = new int[1];
         int textureHandle;
 
@@ -181,11 +183,37 @@ public class GlUtil {
                 GLES20.GL_LINEAR);
         GlUtil.checkGlError("loadImageTexture");
 
+       if (color > 0) {
+           bitmap = convertTransparentBackgroundToColor(bitmap, color);
+       }
+
         // Load the data from the buffer into the texture handle.
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
         GlUtil.checkGlError("loadImageTexture");
 
         return textureHandle;
+    }
+
+    private static Bitmap convertTransparentBackgroundToColor(Bitmap bm, int color)
+    {
+        if (bm == null)
+            return null;
+        if (bm.hasAlpha( ))
+        {
+            try
+            {
+                Bitmap newBitmap = Bitmap.createBitmap(bm.getWidth( ), bm.getHeight( ), bm.getConfig( ));
+                Canvas canvas = new Canvas(newBitmap);
+                canvas.drawColor(color);
+                canvas.drawBitmap(bm, 0, 0, null);
+                bm = newBitmap;
+            }
+            catch (RuntimeException exc)
+            {
+                return null;
+            }
+        }
+        return bm;
     }
 
     /**

@@ -49,7 +49,7 @@ open class BaseLayerImpl : BaseLayer() {
         height = layerHeight
     }
 
-    internal open fun updateRotation(rotate: Int) {
+    open fun updateRotation(rotate: Int) {
         this.rotate = rotate
     }
 }

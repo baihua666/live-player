@@ -18,6 +18,8 @@ open class BaseLayer {
     var height: Int? = null
     var rotate: Int? = null
 
+    var color: Int? = null
+
     fun getCenterX(): Int {
         return x!! + width!! / 2
     }

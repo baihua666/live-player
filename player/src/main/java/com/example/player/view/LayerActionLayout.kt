@@ -35,7 +35,7 @@ class LayerActionLayout(frameLayout: FrameLayout) : StickerView.OperationListene
             this.inEditView = null
         }
         val view = StickerView(frameLayout.context)
-        view.setEnableRotate(false)
+//        view.setEnableRotate(false)
         view.tag = layer
         view.setOperationListener(this)
         view.setParentSize(frameLayout.width, frameLayout.height)
@@ -116,8 +116,8 @@ class LayerActionLayout(frameLayout: FrameLayout) : StickerView.OperationListene
         val width: Int = (stickerView.rawBitmap.width * floatArray[0]).toInt()
         val height: Int = (stickerView.rawBitmap.height * floatArray[4]).toInt()
         //角度计算错误，旋转点不一样，无法直接还原
-//        val rotate = 360 - (stickerView.lastRotateDegree.toInt() - 45)
-//        layer.updateRotation(rotate)
+        val rotate = 360 - (stickerView.lastRotateDegree.toInt() - 45)
+        layer.updateRotation(0 - rotate)
 
         //为什么竖直方向是反的？先临时处理一下
         y = frameLayout.height - y - height
