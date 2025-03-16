@@ -1,12 +1,44 @@
 package com.example.player.layer
 
+import com.example.player.gles.Drawable2d
 import com.example.player.gles.Drawable2dTarget
 import com.example.player.gles.Texture2dProgram
 import com.tencent.mars.xlog.Log
 
 open class TextureLayer : BaseLayerImpl() {
 
+    interface OnTextureLayerListener {
+        fun onModelViewMatrixChanged(matrix16Points: FloatArray)
+    }
+
+    val tag = "TextureLayer"
+
     internal var targetDrawable: Drawable2dTarget? = null
+
+    private var matrix16Points: FloatArray? = null
+
+    private var listener: OnTextureLayerListener? = null
+
+    fun setOnTextureLayerListener(listener: OnTextureLayerListener) {
+        this.listener = listener
+    }
+
+    fun getMatrix(): FloatArray? {
+        return matrix16Points
+    }
+
+    fun configure(texture: Int) {
+        val drawable2d = Drawable2d(Drawable2d.Prefab.RECTANGLE)
+        targetDrawable = Drawable2dTarget(drawable2d)
+        targetDrawable?.setListener {
+            matrix16Points = it.clone()
+            listener?.onModelViewMatrixChanged(matrix16Points!!)
+        }
+//        targetDrawable?.setColor(0.0f, 0.0f, 1.0f)
+        targetDrawable?.setTexture(texture)
+
+        updateDrawable()
+    }
 
     fun draw(program: Texture2dProgram, projectionMatrix: FloatArray ) {
         if (targetDrawable == null || targetDrawable!!.textureId < 0) {
@@ -15,19 +47,20 @@ open class TextureLayer : BaseLayerImpl() {
         targetDrawable!!.draw(program, projectionMatrix)
     }
 
-    internal fun updateCenterPosition(centerX: Int, centerY: Int) {
+    internal fun updateCenterPosition(centerX: Float, centerY: Float) {
         updatePosition(centerX - width!! / 2, centerY - height!! / 2)
     }
 
-    override fun updatePosition(x: Int, y: Int) {
+    override fun updatePosition(x: Float, y: Float) {
         super.updatePosition(x, y)
 
+        Log.d(tag, "updatePosition: $x, $y")
         updateDrawablePosition()
     }
 
-    override fun updateSize(layerWith: Int, layerHeight: Int) {
+    override fun updateSize(layerWith: Float, layerHeight: Float) {
         super.updateSize(layerWith, layerHeight)
-        targetDrawable?.setScale(width!!.toFloat(), height!!.toFloat())
+        targetDrawable?.setScale(width!!, height!!)
         updateDrawablePosition()
     }
 

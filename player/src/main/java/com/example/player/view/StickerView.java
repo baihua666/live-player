@@ -85,7 +85,7 @@ public class StickerView extends BaseImageView {
     private float MAX_SCALE = 1.2f;
 //    private float MAX_SCALE = 2.0f;
 
-
+    //对角线长度的一半
     private double halfDiagonalLength;
 
     private float oringinWidth = 0;
@@ -151,10 +151,13 @@ public class StickerView extends BaseImageView {
 
             float[] arrayOfFloat = new float[9];
             matrix.getValues(arrayOfFloat);
+//            左上角坐标x,y(2,5)
             float f1 = 0.0F * arrayOfFloat[0] + 0.0F * arrayOfFloat[1] + arrayOfFloat[2];
             float f2 = 0.0F * arrayOfFloat[3] + 0.0F * arrayOfFloat[4] + arrayOfFloat[5];
+            //            右上角坐标x,y(0,3)
             float f3 = arrayOfFloat[0] * this.mBitmap.getWidth() + 0.0F * arrayOfFloat[1] + arrayOfFloat[2];
             float f4 = arrayOfFloat[3] * this.mBitmap.getWidth() + 0.0F * arrayOfFloat[4] + arrayOfFloat[5];
+            //            左下角坐标x,y(1,4)
             float f5 = 0.0F * arrayOfFloat[0] + arrayOfFloat[1] * this.mBitmap.getHeight() + arrayOfFloat[2];
             float f6 = 0.0F * arrayOfFloat[3] + arrayOfFloat[4] * this.mBitmap.getHeight() + arrayOfFloat[5];
             float f7 = arrayOfFloat[0] * this.mBitmap.getWidth() + arrayOfFloat[1] * this.mBitmap.getHeight() + arrayOfFloat[2];
@@ -397,7 +400,7 @@ public class StickerView extends BaseImageView {
                 isInResize = false;
                 break;
             case MotionEvent.ACTION_MOVE:
-                //双指缩放
+                // 双指缩放
                 if (isPointerDown) {
                     float scale;
                     float disNew = spacing(event);
@@ -421,8 +424,15 @@ public class StickerView extends BaseImageView {
                     invalidate();
                 } else if (isInResize) {
                     if (enableRotate) {
-                        matrix.postRotate((rotationToStartPoint(event) - lastRotateDegree) * 2, mid.x, mid.y);
-                        lastRotateDegree = rotationToStartPoint(event);
+                        // 计算图片中心点
+                        PointF centerPoint = new PointF();
+                        midDiagonalPoint(centerPoint);
+                        // 计算旋转角度
+                        float currentDegree = rotationToCenterPoint(event, centerPoint);
+                        float rotateDegree = currentDegree - lastRotateDegree;
+                        // 以中心点旋转
+                        matrix.postRotate(rotateDegree, centerPoint.x, centerPoint.y);
+                        lastRotateDegree = currentDegree;
                     }
 
                     float scale = diagonalLength(event) / lastLength;
@@ -441,7 +451,10 @@ public class StickerView extends BaseImageView {
                     mScaleY = scale;
                     invalidate();
                     if (enableRotate && operationListener != null) {
-                        operationListener.onRotate(this, (rotationToStartPoint(event) - lastRotateDegree) * 2, mid.x, mid.y);
+                        // 计算图片中心点
+                        PointF centerPoint = new PointF();
+                        midDiagonalPoint(centerPoint);
+                        operationListener.onRotate(this, lastRotateDegree, centerPoint.x, centerPoint.y);
                     }
                 } else if (isInSide) {
                     float x = event.getX(0);
@@ -677,12 +690,23 @@ public class StickerView extends BaseImageView {
      * @return
      */
     private float rotationToStartPoint(MotionEvent event) {
+        return rotationToCenterPoint(event, new PointF(0, 0));
+//        float[] arrayOfFloat = new float[9];
+//        matrix.getValues(arrayOfFloat);
+//        float x = 0.0f * arrayOfFloat[0] + 0.0f * arrayOfFloat[1] + arrayOfFloat[2];
+//        float y = 0.0f * arrayOfFloat[3] + 0.0f * arrayOfFloat[4] + arrayOfFloat[5];
+//        double arc = Math.atan2(event.getY(0) - y, event.getX(0) - x);
+//        return (float) Math.toDegrees(arc);
+    }
 
-        float[] arrayOfFloat = new float[9];
-        matrix.getValues(arrayOfFloat);
-        float x = 0.0f * arrayOfFloat[0] + 0.0f * arrayOfFloat[1] + arrayOfFloat[2];
-        float y = 0.0f * arrayOfFloat[3] + 0.0f * arrayOfFloat[4] + arrayOfFloat[5];
-        double arc = Math.atan2(event.getY(0) - y, event.getX(0) - x);
+    /**
+     * 计算触摸点相对于图片中心点的旋转角度
+     * @param event 触摸事件
+     * @param centerPoint 图片中心点
+     * @return 旋转角度
+     */
+    private float rotationToCenterPoint(MotionEvent event, PointF centerPoint) {
+        double arc = Math.atan2(event.getY(0) - centerPoint.y, event.getX(0) - centerPoint.x);
         return (float) Math.toDegrees(arc);
     }
 
@@ -746,3 +770,6 @@ public class StickerView extends BaseImageView {
         return lastRotateDegree;
     }
 }
+
+
+

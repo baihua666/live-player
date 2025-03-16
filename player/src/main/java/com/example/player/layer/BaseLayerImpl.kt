@@ -15,10 +15,10 @@ open class BaseLayerImpl : BaseLayer() {
     fun updatePropertiesJson(json: String) {
         propertiesJson = json
         val obj = JSONObject(json)
-        this.x = obj.getInt("x")
-        this.y = obj.getInt("y")
-        this.width = obj.getInt("width")
-        this.height = obj.getInt("height")
+        this.x = obj.getDouble("x").toFloat()
+        this.y = obj.getDouble("y").toFloat()
+        this.width = obj.getDouble("width").toFloat()
+        this.height = obj.getDouble("height").toFloat()
     }
 
     open fun stop() {
@@ -39,12 +39,20 @@ open class BaseLayerImpl : BaseLayer() {
 
     }
 
-    internal open fun updatePosition(x: Int, y: Int) {
+    internal open fun updatePosition(x: Float, y: Float) {
         this.x = x
         this.y = y
     }
 
-    internal open fun updateSize(layerWith: Int, layerHeight: Int) {
+    internal open fun move(dx: Int, dy: Int) {
+        if (x == null || y == null) {
+            return
+        }
+
+        updatePosition(x!! + dx, y!! + dy)
+    }
+
+    internal open fun updateSize(layerWith: Float, layerHeight: Float) {
         width = layerWith
         height = layerHeight
     }

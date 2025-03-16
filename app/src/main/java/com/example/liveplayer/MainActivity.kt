@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
 
     private fun testRotation() {
         addImageLayer()
-        startTimer()
+//        startTimer()
     }
 
 //    @RequiresApi(Build.VERSION_CODES.O)
@@ -83,10 +83,13 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
 
     private fun addImageLayer() {
         val bitmap = BitmapFactory.decodeResource(
-            resources, R.drawable.ic_theme_play_arrow
+            resources, R.drawable.test
         )
         testLayer = layerManager.addBitmapLayer(bitmap)
-        testLayer?.color = Color.argb(100, 0, 255, 0)
+        testLayer?.color = Color.argb(255, 0, 250, 0)
+        testLayer?.rotate = 10
+        testLayer?.x = 50.0f
+        testLayer?.y = 100.0f
         testLayer?.let {
             layerManager.showActionView(it)
         }
@@ -111,6 +114,6 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
                 }
                 testLayer?.updateRotation(rotate)
             }
-        }, 100, 100)
+        }, 100, 5000)
     }
 }

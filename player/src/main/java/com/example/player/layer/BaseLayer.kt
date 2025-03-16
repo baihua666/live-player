@@ -12,19 +12,19 @@ open class BaseLayer {
 
     var touchEnable = true
 
-    var x: Int? = null
-    var y: Int? = null
-    var width: Int? = null
-    var height: Int? = null
+    var x: Float? = null
+    var y: Float? = null
+    var width: Float? = null
+    var height: Float? = null
     var rotate: Int? = null
 
     var color: Int? = null
 
-    fun getCenterX(): Int {
+    fun getCenterX(): Float {
         return x!! + width!! / 2
     }
 
-    fun getCenterY(): Int {
+    fun getCenterY(): Float {
         return y!! + height!! / 2
     }
 }

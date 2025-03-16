@@ -113,12 +113,26 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
 
     override fun addBitmapLayer(bitmap: Bitmap) : BitmapLayer? {
         val layer = BitmapLayer()
-        layer.updateSize(bitmap.width, bitmap.height)
-        layer.updateCenterPosition(previewWidth / 2, previewHeight / 2)
-
+        layer.updateSize(bitmap.width.toFloat(), bitmap.height.toFloat())
+        //放在中间位置
+        layer.updateCenterPosition(previewWidth / 2.0f, previewHeight / 2.0f)
+        layer.updateCenterPosition(bitmap.width / 2.0f, previewHeight / 2.0f)
         runOnGLThread {
             layer.configure(bitmap)
         }
+
+        layer.setOnTextureLayerListener(object : TextureLayer.OnTextureLayerListener {
+            override fun onModelViewMatrixChanged(matrix16Points: FloatArray) {
+                Log.d(TAG, "onModelViewMatrixChanged")
+                //如果有TouchView，则更新TouchView的位置
+                if (actionView?.touchViewLayer() == layer) {
+                    actionView?.touchView?.setModelViewMatrix(matrix16Points)
+                }
+                else {
+                    Log.d(TAG, "onModelViewMatrixChanged, no touch view")
+                }
+            }
+        })
 
         synchronized(layerList) {
             layerList.add(layer)
@@ -253,7 +267,7 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
         val buf = ByteBuffer.allocateDirect(width * height * 4)
         buf.order(ByteOrder.LITTLE_ENDIAN)
 
-        val startWhen = System.nanoTime()
+        val startWhen = System.currentTimeMillis()
         // Try to ensure that rendering has finished.
         GLES20.glFinish()
         GLES20.glReadPixels(
@@ -265,8 +279,8 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
         // just read the same buffer repeatedly we might get some sort of cache effect.
 
 
-        var totalTime = System.nanoTime() - startWhen
-        android.util.Log.d("glReadPixels:", "ms:" + totalTime / 1000)
+        var totalTime = System.currentTimeMillis() - startWhen
+//        android.util.Log.d("glReadPixels:", "ms:" + totalTime)
 
         val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         bmp.copyPixelsFromBuffer(buf)

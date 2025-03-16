@@ -183,9 +183,13 @@ public class GlUtil {
                 GLES20.GL_LINEAR);
         GlUtil.checkGlError("loadImageTexture");
 
-       if (color > 0) {
-           bitmap = convertTransparentBackgroundToColor(bitmap, color);
-       }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Color c =  Color.valueOf(color);
+            if (c.alpha() != 0) {
+                bitmap = convertTransparentBackgroundToColor(bitmap, color);
+            }
+        }
+
 
         // Load the data from the buffer into the texture handle.
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);

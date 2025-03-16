@@ -24,14 +24,13 @@ open class VideoLayer : TextureLayer() {
         videoView?.setFilter(object : IjkFilter {
             override fun onCreated() {
                 val drawable2d = Drawable2d(Drawable2d.Prefab.RECTANGLE)
-                targetDrawable =
-                    Drawable2dTarget(drawable2d)
+                targetDrawable = Drawable2dTarget(drawable2d)
                 //视频是反的？先特殊处理一下
                 targetDrawable?.isMirrorY = true
 
             }
 
-            override fun onSizeChanged(width: Int, height: Int) {
+            override fun onSizeChanged(width: Float, height: Float) {
 //                if (this@VideoLayer.width == null) {
 //                    this@VideoLayer.width = width
 //                }
@@ -40,7 +39,7 @@ open class VideoLayer : TextureLayer() {
 //                }
 
                 updateSize(width, height)
-                updateCenterPosition(previewWidth /2, previewHeight /2)
+                updateCenterPosition(previewWidth / 2.0f, previewHeight / 2.0f)
                 checkContentRectReady()
 
 

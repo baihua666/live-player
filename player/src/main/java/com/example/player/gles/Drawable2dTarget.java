@@ -17,11 +17,19 @@
 package com.example.player.gles;
 
 import android.opengl.Matrix;
+import android.util.Log;
+
+import java.util.Arrays;
 
 /**
  * Base class for a 2d object.  Includes position, scale, rotation, and flat-shaded color.
  */
 public class Drawable2dTarget {
+    public interface Drawable2dTargetListener {
+//        float[16]
+        void onModelViewMatrixChanged(float[] modelViewMatrix);
+    }
+
     private static final String TAG = GlUtil.TAG;
 
     private Drawable2d mDrawable;
@@ -29,8 +37,11 @@ public class Drawable2dTarget {
     private int mTextureId;
     private float mAngle;
     private float mScaleX, mScaleY;
+    //center在坐标系的位置
+    //左下角为原点
     private float mPosX, mPosY;
 
+//    float[16]
     private float[] mModelViewMatrix;
     private boolean mMatrixReady;
 
@@ -38,6 +49,8 @@ public class Drawable2dTarget {
 
     private boolean mirrorX = false;
     private boolean mirrorY = false;
+
+    private Drawable2dTargetListener listener;
 
     public Drawable2dTarget(Drawable2d drawable) {
         mDrawable = drawable;
@@ -49,11 +62,16 @@ public class Drawable2dTarget {
         mMatrixReady = false;
     }
 
+    public void setListener(Drawable2dTargetListener listener) {
+        this.listener = listener;
+    }
+
     /**
      * Re-computes mModelViewMatrix, based on the current values for rotation, scale, and
      * translation.
      */
     private void recomputeMatrix() {
+        float[] oldModelView = mModelViewMatrix.clone();
         float[] modelView = mModelViewMatrix;
 
         Matrix.setIdentityM(modelView, 0);
@@ -63,6 +81,16 @@ public class Drawable2dTarget {
         }
         Matrix.scaleM(modelView, 0, mirrorX ? - mScaleX : mScaleX, mirrorY ? - mScaleY : mScaleY, 1.0f);
         mMatrixReady = true;
+
+        if (!Arrays.equals(modelView, oldModelView)) {
+            Log.d(TAG, "Recomputed matrix update");
+            if (listener != null) {
+                listener.onModelViewMatrixChanged(modelView);
+            }
+            else {
+                Log.d(TAG, "No listener to update matrix");
+            }
+        }
     }
 
     /**
