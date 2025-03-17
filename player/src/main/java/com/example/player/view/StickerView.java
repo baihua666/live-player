@@ -690,13 +690,13 @@ public class StickerView extends BaseImageView {
      * @return
      */
     private float rotationToStartPoint(MotionEvent event) {
-        return rotationToCenterPoint(event, new PointF(0, 0));
-//        float[] arrayOfFloat = new float[9];
-//        matrix.getValues(arrayOfFloat);
-//        float x = 0.0f * arrayOfFloat[0] + 0.0f * arrayOfFloat[1] + arrayOfFloat[2];
-//        float y = 0.0f * arrayOfFloat[3] + 0.0f * arrayOfFloat[4] + arrayOfFloat[5];
-//        double arc = Math.atan2(event.getY(0) - y, event.getX(0) - x);
-//        return (float) Math.toDegrees(arc);
+//        return rotationToCenterPoint(event, new PointF(0, 0));
+        float[] arrayOfFloat = new float[9];
+        matrix.getValues(arrayOfFloat);
+        float x = 0.0f * arrayOfFloat[0] + 0.0f * arrayOfFloat[1] + arrayOfFloat[2];
+        float y = 0.0f * arrayOfFloat[3] + 0.0f * arrayOfFloat[4] + arrayOfFloat[5];
+        double arc = Math.atan2(event.getY(0) - y, event.getX(0) - x);
+        return (float) Math.toDegrees(arc);
     }
 
     /**

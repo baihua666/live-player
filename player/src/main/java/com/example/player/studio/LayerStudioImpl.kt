@@ -7,7 +7,6 @@ import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.os.Handler
 import android.os.Looper
-import android.widget.FrameLayout
 import com.example.player.BuildConfig
 import com.example.player.gles.GlUtil
 import com.example.player.layer.BaseLayer
@@ -54,7 +53,7 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
         this.listener = listener
     }
 
-    override fun startPreview(context: Context, surfaceView: GLSurfaceView, actionView: FrameLayout?) {
+    override fun startPreview(context: Context, surfaceView: GLSurfaceView, actionView: LayerActionLayout?) {
         this.context = context
         mainHandler = Handler(Looper.getMainLooper())
 
@@ -62,10 +61,11 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
         render?.listener = this
         render?.startPreview(surfaceView)
 
-        actionView?.let {
-            this.actionView = LayerActionLayout(actionView)
-            this.actionView!!.listener = layerActionListener
-        }
+        this.actionView = actionView
+//        actionView?.let {
+//            this.actionView = LayerActionLayout(actionView)
+//            this.actionView!!.listener = layerActionListener
+//        }
     }
 
     override fun stopPreview() {

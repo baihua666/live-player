@@ -4,11 +4,11 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.opengl.GLSurfaceView
-import android.widget.FrameLayout
 import com.example.player.layer.BaseLayerImpl
 import com.example.player.layer.BitmapLayer
 import com.example.player.layer.ImageLayer
 import com.example.player.layer.VideoLayer
+import com.example.player.view.LayerActionLayout
 
 
 interface LayerStudio {
@@ -22,7 +22,7 @@ interface LayerStudio {
 
     fun setListener(listener: LayerStudioListener)
 
-    fun startPreview(context: Context, surfaceView: GLSurfaceView, actionView: FrameLayout?)
+    fun startPreview(context: Context, surfaceView: GLSurfaceView, actionView: LayerActionLayout?)
 //
     fun stopPreview()
 //

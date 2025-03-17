@@ -16,7 +16,7 @@ open class BaseLayer {
     var y: Float? = null
     var width: Float? = null
     var height: Float? = null
-    var rotate: Int? = null
+    var rotate: Float? = null
 
     var color: Int? = null
 

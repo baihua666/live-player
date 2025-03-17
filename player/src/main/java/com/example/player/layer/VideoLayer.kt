@@ -30,7 +30,7 @@ open class VideoLayer : TextureLayer() {
 
             }
 
-            override fun onSizeChanged(width: Float, height: Float) {
+            override fun onSizeChanged(width: Int, height: Int) {
 //                if (this@VideoLayer.width == null) {
 //                    this@VideoLayer.width = width
 //                }
@@ -38,7 +38,7 @@ open class VideoLayer : TextureLayer() {
 //                    this@VideoLayer.height = height
 //                }
 
-                updateSize(width, height)
+                updateSize(width.toFloat(), height.toFloat())
                 updateCenterPosition(previewWidth / 2.0f, previewHeight / 2.0f)
                 checkContentRectReady()
 

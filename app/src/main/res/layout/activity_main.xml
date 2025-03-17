@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <FrameLayout
+    <com.example.player.view.LayerActionLayout
         android:id="@+id/layer_studio_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -21,5 +21,15 @@
             android:id="@+id/glSurfaceView"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-    </FrameLayout>
+    </com.example.player.view.LayerActionLayout>
+
+    <GridLayout
+        android:id="@+id/gl_test_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layer_studio_view"
+        tools:context=".DynamicGridLayout" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,12 +5,12 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.opengl.GLSurfaceView
 import android.util.Size
-import android.widget.FrameLayout
 import com.example.player.layer.BaseLayerImpl
 import com.example.player.layer.BitmapLayer
 import com.example.player.layer.VideoLayer
 import com.example.player.studio.LayerStudio
 import com.example.player.studio.LayerStudioListener
+import com.example.player.view.LayerActionLayout
 
 class LayerManager {
     public var outputSize: Size? = null
@@ -21,7 +21,7 @@ class LayerManager {
         layerStudio.setListener(listener)
     }
 
-    public fun startPreview(context: Context, surfaceView: GLSurfaceView, actionView: FrameLayout?) {
+    public fun startPreview(context: Context, surfaceView: GLSurfaceView, actionView: LayerActionLayout?) {
         layerStudio.startPreview(context, surfaceView, actionView)
     }
 

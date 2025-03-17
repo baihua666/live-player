@@ -91,7 +91,12 @@ public class TouchView extends View implements BaseTouchView {
      */
     private float lastLength;
     //    禁用旋转
-    private boolean enableRotate = false;
+    private boolean enableRotate = true;
+//    禁用水平镜像
+    private boolean enableFlipH = false;
+//    禁用垂直镜像
+    private boolean enableFlipV = false;
+
     private float lastRotateDegree;
     private double halfDiagonalLength;
 
@@ -251,17 +256,19 @@ public class TouchView extends View implements BaseTouchView {
                     isInRomate = false;
                     isInResize = true;
 //                    lastRotateDegree = rotationToStartPoint(event);
+                    lastRotateDegree = rotationToCenterPoint(event, centerPoint);
+
                     midPointToStartPoint(event);
                     lastLength = diagonalLength(event);
                 }
-//                else if (isInButton(event, dst_flipV)) {
-//                    isInRomate = false;
-//                }
-//                else if (isInButton(event, dst_top)) {
+                else if (enableFlipV && isInButton(event, dst_flipV)) {
+                    isInRomate = false;
+                }
+                else if (isInButton(event, dst_top)) {
 //                    X = (dst_top.left + dst_resize.right) / 2;
 //                    Y = (dst_top.top + dst_resize.bottom) / 2;
 //                    if (enableRotate) {
-//                        matrix.postRotate(lastRotateDegree + 90, X, Y);
+////                        matrix.postRotate(lastRotateDegree + 90, X, Y);
 //                        lastRotateDegree += 90;
 //                    }
 //                    isInRomate = true;
@@ -269,7 +276,7 @@ public class TouchView extends View implements BaseTouchView {
 //                    if (enableRotate && operationListener != null) {
 //                        operationListener.onRotate(this, lastRotateDegree + 90, X, Y);
 //                    }
-//                }
+                }
                 else if (isInContent(event)) {
                     isInSide = true;
                     isInRomate = false;
@@ -321,8 +328,8 @@ public class TouchView extends View implements BaseTouchView {
                 } else if (isInResize) {
                     if (enableRotate) {
                         // 计算图片中心点
-                        PointF centerPoint = new PointF();
-                        midDiagonalPoint(centerPoint);
+//                        PointF centerPoint = new PointF();
+//                        midDiagonalPoint(centerPoint);
                         // 计算旋转角度
                         float currentDegree = rotationToCenterPoint(event, centerPoint);
                         float rotateDegree = currentDegree - lastRotateDegree;
@@ -624,8 +631,14 @@ public class TouchView extends View implements BaseTouchView {
 
         canvas.drawBitmap(deleteBitmap, null, dst_delete, null);
         canvas.drawBitmap(resizeBitmap, null, dst_resize, null);
-        canvas.drawBitmap(flipVBitmap, null, dst_flipV, null);
-        canvas.drawBitmap(topBitmap, null, dst_top, null);
+
+        if (enableFlipV) {
+            canvas.drawBitmap(flipVBitmap, null, dst_flipV, null);
+        }
+        if (enableFlipH) {
+            canvas.drawBitmap(topBitmap, null, dst_top, null);
+        }
+
 
     }
 

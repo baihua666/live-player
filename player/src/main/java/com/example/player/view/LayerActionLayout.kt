@@ -1,7 +1,10 @@
 package com.example.player.view
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
+import android.util.AttributeSet
+import android.view.MotionEvent
 import android.widget.FrameLayout
 import android.widget.RelativeLayout
 import com.example.player.layer.BaseLayerImpl
@@ -9,10 +12,10 @@ import com.example.player.layer.TextureLayer
 import com.tencent.mars.xlog.Log
 
 
-class LayerActionLayout(frameLayout: FrameLayout) : StickerView.OperationListener {
+class LayerActionLayout: FrameLayout, StickerView.OperationListener {
     private val TAG = "[LayerActionLayout]"
 
-    private var frameLayout: FrameLayout
+//    private var frameLayout: FrameLayout
 
     var inEditView: StickerView? = null
 
@@ -21,9 +24,8 @@ class LayerActionLayout(frameLayout: FrameLayout) : StickerView.OperationListene
 
     var listener: LayerActionViewListener? = null
 
-    init {
-        this.frameLayout = frameLayout
-    }
+    constructor(context: Context?) : super(context)
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
 
     fun stickerViewLayer() : BaseLayerImpl? {
         if (this.inEditView != null) {
@@ -52,22 +54,22 @@ class LayerActionLayout(frameLayout: FrameLayout) : StickerView.OperationListene
     fun showStickerView(layer: BaseLayerImpl) {
         if (this.inEditView != null) {
             this.inEditView!!.setInEdit(false)
-            frameLayout.removeView(this.inEditView!!)
+            removeView(this.inEditView!!)
             this.inEditView = null
         }
-        val view = StickerView(frameLayout.context)
-//        view.setEnableRotate(false)
+        val view = StickerView(context)
+        view.setEnableRotate(false)
         view.tag = layer
         view.setOperationListener(this)
-        view.setParentSize(frameLayout.width, frameLayout.height)
+        view.setParentSize(width, height)
 
         val layoutParams = RelativeLayout.LayoutParams(
             RelativeLayout.LayoutParams.MATCH_PARENT,
             RelativeLayout.LayoutParams.MATCH_PARENT
         )
 
-        frameLayout.addView(view, layoutParams)
-        frameLayout.bringChildToFront(view)
+        addView(view, layoutParams)
+        bringChildToFront(view)
 
         view.posX = (layer.x ?: 0).toFloat()
         view.posY = (layer.y ?: 0).toFloat()
@@ -90,11 +92,11 @@ class LayerActionLayout(frameLayout: FrameLayout) : StickerView.OperationListene
     fun showTouchView(layer: BaseLayerImpl) {
         if (this.touchView != null) {
             this.touchView!!.setInEdit(false)
-            frameLayout.removeView(this.touchView!!)
+            removeView(this.touchView!!)
             this.touchView = null
         }
         Log.d(TAG, "showTouchView:%d", layer.layerId)
-        val view = TouchView(frameLayout.context)
+        val view = TouchView(context)
         this.touchView = view
 
 //        view.setLayerSize(layer.width ?: 0, layer.height ?: 0)
@@ -113,7 +115,7 @@ class LayerActionLayout(frameLayout: FrameLayout) : StickerView.OperationListene
         view.setOperationListener(
             object : TouchView.OperationListener {
                 override fun onDeleteClick(touchView: TouchView?) {
-                    frameLayout.removeView(touchView)
+                    removeView(touchView)
                     listener?.onLayerActionViewDelete(actionViewLayer()!!)
                 }
 
@@ -139,7 +141,7 @@ class LayerActionLayout(frameLayout: FrameLayout) : StickerView.OperationListene
 
                 override fun onRotate(touchView: TouchView?, degrees: Float, px: Float, py: Float) {
                     if (layer is TextureLayer) {
-                        layer.updateRotation(layer.rotate!! + degrees.toInt())
+                        layer.updateRotation(layer.rotate!! - degrees)
                     }
                     listener?.onLayerActionViewRotate(touchViewLayer()!!, degrees, px, py)
                 }
@@ -151,8 +153,8 @@ class LayerActionLayout(frameLayout: FrameLayout) : StickerView.OperationListene
             RelativeLayout.LayoutParams.MATCH_PARENT
         )
 
-        frameLayout.addView(view, layoutParams)
-        frameLayout.bringChildToFront(view)
+        addView(view, layoutParams)
+        bringChildToFront(view)
 
 //        view.posX = (layer.x ?: 0).toFloat()
 //        view.posY = (layer.y ?: 0).toFloat()
@@ -161,11 +163,6 @@ class LayerActionLayout(frameLayout: FrameLayout) : StickerView.OperationListene
 //            val bitmap = Bitmap.createBitmap(layer.width ?: 0, layer.height ?: 0, Bitmap.Config.ARGB_8888)
 //            view.bitmap = bitmap
 //        }
-
-
-
-
-
     }
 
     override fun onDeleteClick(stickerView: StickerView?) {
@@ -173,7 +170,7 @@ class LayerActionLayout(frameLayout: FrameLayout) : StickerView.OperationListene
             Log.e(TAG, "onMove error");
             return
         }
-        frameLayout.removeView(stickerView)
+        removeView(stickerView)
         val layer: BaseLayerImpl = stickerView.tag as BaseLayerImpl
         listener?.onLayerActionViewDelete(layer)
     }
@@ -219,10 +216,10 @@ class LayerActionLayout(frameLayout: FrameLayout) : StickerView.OperationListene
         val height: Float = (stickerView.rawBitmap.height * floatArray[4])
         //角度计算错误，旋转点不一样，无法直接还原
         val rotate = 360 - (stickerView.lastRotateDegree.toInt() - 45)
-        layer.updateRotation(0 - rotate)
+        layer.updateRotation(0f - rotate)
 
         //为什么竖直方向是反的？先临时处理一下
-        y = frameLayout.height - y - height
+        y = height - y - height
 
         layer.updatePosition(x, y)
         layer.updateSize(width, height)
@@ -239,6 +236,13 @@ class LayerActionLayout(frameLayout: FrameLayout) : StickerView.OperationListene
         Log.d(TAG, "onRotate:" + stickerView.lastRotateDegree.toInt());
         listener?.onLayerActionViewRotate(layer, degrees, px, py)
     }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        return super.onTouchEvent(event)
+//        如果当前没有显示的操作视图
+
+    }
+
 
     interface LayerActionViewListener {
         fun onLayerActionViewDelete(layer: BaseLayerImpl)

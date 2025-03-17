@@ -64,7 +64,7 @@ open class TextureLayer : BaseLayerImpl() {
         updateDrawablePosition()
     }
 
-    override fun updateRotation(rotate: Int) {
+    override fun updateRotation(rotate: Float) {
         super.updateRotation(rotate)
         targetDrawable?.rotation = rotate.toFloat()
         Log.d("TextureLayer", "updateRotation: $rotate")
