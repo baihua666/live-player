@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.opengl.GLSurfaceView
 import android.os.Build
 import android.os.Bundle
+import android.util.Size
 import android.view.Gravity
 import android.widget.Button
 import android.widget.GridLayout
@@ -114,7 +115,7 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
 
         glSurfaceView = findViewById(R.id.glSurfaceView)
         actionView = findViewById(R.id.layer_studio_view)
-        layerManager.startPreview(this, glSurfaceView, actionView)
+        layerManager.startPreview(this, glSurfaceView, Size(1080, 1920), actionView)
 
         val color:Color = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Color.valueOf(1.0f, 0.0f, 0.0f, 0.1f)

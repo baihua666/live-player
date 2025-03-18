@@ -16,6 +16,7 @@ import android.view.View;
 import androidx.core.view.MotionEventCompat;
 
 import com.example.player.R;
+import com.example.player.util.LayerMatrixUti;
 
 import java.util.Arrays;
 
@@ -60,7 +61,7 @@ public class TouchView extends View implements BaseTouchView {
     private int mContentHeight;
 
     // 左上，右上，右下，左下
-    private float[] transformedCorners = new float[8];
+    private float[] transformedCorners;
 
     private boolean isInRomate = false;
     private boolean isInResize = false;
@@ -166,11 +167,28 @@ public class TouchView extends View implements BaseTouchView {
         topBitmapHeight = (int) (topBitmap.getHeight() * BITMAP_SCALE);
     }
 
+    private boolean updateCorners() {
+        if (viewHeight == 0) {
+            return false;
+        }
+        transformedCorners = LayerMatrixUti.INSTANCE.matrixToCorners(mModelViewMatrix, viewHeight);
+
+        float centerX = (transformedCorners[0] + transformedCorners[2]) / 2;
+        float centerY = (transformedCorners[1] + transformedCorners[3]) / 2;
+        centerPoint.set(centerX, centerY);
+
+        mContentWidth = (int) (transformedCorners[2] - transformedCorners[0]);
+        mContentHeight = (int) (transformedCorners[7] - transformedCorners[1]);
+        setDiagonalLength();
+        return true;
+    }
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         viewWidth = w;
         viewHeight = h;
+        updateCorners();
     }
 
     @Override
@@ -180,6 +198,7 @@ public class TouchView extends View implements BaseTouchView {
             return;
         }
         mModelViewMatrix = modelViewMatrix;
+        updateCorners();
         invalidate();
     }
 
@@ -204,36 +223,6 @@ public class TouchView extends View implements BaseTouchView {
         }
 
         Log.d(TAG, "onDraw方法，mModelViewMatrix----->");
-
-        // 定义四个顶点的坐标
-        float[] corners = {
-            -0.5f, -0.5f,
-                0.5f, -0.5f,
-                0.5f, 0.5f,
-                -0.5f, 0.5f
-        };
-
-        // 计算矩阵的中心
-        float centerX = mModelViewMatrix[12];
-        float centerY = mModelViewMatrix[13];
-        centerPoint.set(centerX, centerY);
-
-        // 变换顶点坐标
-        for (int i = 0; i < 4; i++) {
-            int j = i * 2;
-            float x = corners[j];
-            float y = corners[j + 1];
-            // 进行变换
-            transformedCorners[j] = mModelViewMatrix[0] * x + mModelViewMatrix[4] * y + centerX;
-            transformedCorners[j + 1] = mModelViewMatrix[1] * x + mModelViewMatrix[5] * y + centerY;
-            transformedCorners[j + 1] = viewHeight - transformedCorners[j + 1];
-        }
-
-        mContentWidth = (int) (transformedCorners[2] - transformedCorners[0]);
-        mContentHeight = (int) (transformedCorners[7] - transformedCorners[1]);
-        setDiagonalLength();
-
-        fixCoordinate();
 
         if (isInEdit) {
             drawBorder(canvas);
@@ -641,24 +630,5 @@ public class TouchView extends View implements BaseTouchView {
 
 
     }
-
-    private float[] tmpCorners = new float[8];
-    //实测发现边框和内容不对齐，OPENGL用的是左下坐标系，而android用的是左上坐标系，所以需要修正坐标
-    private void fixCoordinate() {
-        System.arraycopy(transformedCorners, 0, tmpCorners, 0, 8);
-        transformedCorners[0] = tmpCorners[6];
-        transformedCorners[1] = tmpCorners[7];
-
-        transformedCorners[2] = tmpCorners[4];
-        transformedCorners[3] = tmpCorners[5];
-
-        transformedCorners[4] = tmpCorners[2];
-        transformedCorners[5] = tmpCorners[3];
-
-        transformedCorners[6] = tmpCorners[0];
-        transformedCorners[7] = tmpCorners[1];
-    }
-
-
 }
 

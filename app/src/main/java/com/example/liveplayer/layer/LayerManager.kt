@@ -21,8 +21,8 @@ class LayerManager {
         layerStudio.setListener(listener)
     }
 
-    public fun startPreview(context: Context, surfaceView: GLSurfaceView, actionView: LayerActionLayout?) {
-        layerStudio.startPreview(context, surfaceView, actionView)
+    public fun startPreview(context: Context, surfaceView: GLSurfaceView, viewPortSize: Size, actionView: LayerActionLayout?) {
+        layerStudio.startPreview(context, surfaceView, viewPortSize, actionView)
     }
 
     fun setBackgroundColor(color: Color) {

@@ -5,10 +5,14 @@ import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.util.AttributeSet
 import android.view.MotionEvent
+import android.view.View
 import android.widget.FrameLayout
 import android.widget.RelativeLayout
+import com.example.player.layer.BaseLayer
 import com.example.player.layer.BaseLayerImpl
 import com.example.player.layer.TextureLayer
+import com.example.player.studio.LayerStudio
+import com.example.player.util.LayerMatrixUti
 import com.tencent.mars.xlog.Log
 
 
@@ -24,10 +28,14 @@ class LayerActionLayout: FrameLayout, StickerView.OperationListener {
 
     var listener: LayerActionViewListener? = null
 
-    constructor(context: Context?) : super(context)
+    lateinit var layerStudio: LayerStudio
+
+
+    constructor(context: Context?, layerStudio: LayerStudio) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
 
-    fun stickerViewLayer() : BaseLayerImpl? {
+
+    private fun stickerViewLayer() : BaseLayerImpl? {
         if (this.inEditView != null) {
             return this.inEditView!!.tag as BaseLayerImpl
         }
@@ -46,12 +54,16 @@ class LayerActionLayout: FrameLayout, StickerView.OperationListener {
         return stickerViewLayer()?: touchViewLayer()
     }
 
-    fun showActionView(layer: BaseLayerImpl) {
+    fun showActionView(layer: BaseLayer) {
 //        showStickerView(layer)
         showTouchView(layer)
     }
 
-    fun showStickerView(layer: BaseLayerImpl) {
+    private fun getActionView() : View? {
+        return inEditView ?: touchView
+    }
+
+    private fun showStickerView(layer: BaseLayer) {
         if (this.inEditView != null) {
             this.inEditView!!.setInEdit(false)
             removeView(this.inEditView!!)
@@ -89,7 +101,7 @@ class LayerActionLayout: FrameLayout, StickerView.OperationListener {
         this.inEditView = view
     }
 
-    fun showTouchView(layer: BaseLayerImpl) {
+    private fun showTouchView(layer: BaseLayer) {
         if (this.touchView != null) {
             this.touchView!!.setInEdit(false)
             removeView(this.touchView!!)
@@ -165,6 +177,19 @@ class LayerActionLayout: FrameLayout, StickerView.OperationListener {
 //        }
     }
 
+    private fun releaseActionView() {
+        if (this.inEditView != null) {
+            this.inEditView!!.setInEdit(false)
+            removeView(this.inEditView!!)
+            this.inEditView = null
+        }
+        if (this.touchView != null) {
+            this.touchView!!.setInEdit(false)
+            removeView(this.touchView!!)
+            this.touchView = null
+        }
+    }
+
     override fun onDeleteClick(stickerView: StickerView?) {
         if (stickerView == null) {
             Log.e(TAG, "onMove error");
@@ -237,10 +262,57 @@ class LayerActionLayout: FrameLayout, StickerView.OperationListener {
         listener?.onLayerActionViewRotate(layer, degrees, px, py)
     }
 
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        return super.onTouchEvent(event)
-//        如果当前没有显示的操作视图
+    //        如果当前有显示的操作视图,并且是在视图上，是不会触发onTouchEvent的
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        var handled = super.onTouchEvent(event)
+        //如果有已经在编辑的视图，取消编辑
+        val actionView = getActionView()
+        if (actionView != null) {
+            releaseActionView()
+            handled = true
+        }
+        //判断是否有可以激活的图层
+        val layerList = layerStudio.getLayerList()
+        for (layer in layerList) {
+            //图层的位置是否在触摸点范围内
+            val x = event.x
+            val y = event.y
+            if (isPointInLayer(x, y, layer)) {
+                showActionView(layer)
+                handled = true
+                break
+            }
 
+        }
+
+        return handled
+    }
+
+    /**
+     * 是否在图层区域
+     * 图片旋转后 可能存在菱形状态 不能用4个点的坐标范围去判断点击区域是否在图片内
+     *
+     * @return
+     */
+    private fun isPointInLayer(x: Float, y: Float, layer: BaseLayer) : Boolean {
+        if (layer is TextureLayer) {
+            return isPointInTextureLayer(x, y, layer)
+        }
+        //普通图层，判断矩形区域
+        val left = layer.x ?: 0f
+        val top = layer.y ?: 0f
+        val right = left + (layer.width ?: 0f)
+        val bottom = top + (layer.height ?: 0f)
+        return x in left..right && top <= y && y <= bottom
+    }
+
+    private fun isPointInTextureLayer(x: Float, y: Float, layer: TextureLayer): Boolean {
+        if (layer.getMatrix() == null) {
+            return false
+        }
+
+        val corners = LayerMatrixUti.matrixToCorners(layer.getMatrix()!!, height.toFloat())
+        return LayerMatrixUti.isPointInCornersRect(x, y, corners)
     }
 
 

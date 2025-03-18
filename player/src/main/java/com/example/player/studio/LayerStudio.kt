@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.opengl.GLSurfaceView
+import android.util.Size
+import com.example.player.layer.BaseLayer
 import com.example.player.layer.BaseLayerImpl
 import com.example.player.layer.BitmapLayer
 import com.example.player.layer.ImageLayer
@@ -22,7 +24,7 @@ interface LayerStudio {
 
     fun setListener(listener: LayerStudioListener)
 
-    fun startPreview(context: Context, surfaceView: GLSurfaceView, actionView: LayerActionLayout?)
+    fun startPreview(context: Context, surfaceView: GLSurfaceView, viewPortSize: Size, actionView: LayerActionLayout?)
 //
     fun stopPreview()
 //
@@ -54,4 +56,12 @@ interface LayerStudio {
     fun addVideoLayer(filePath: String) : VideoLayer?
 //
 //    open fun addCameraLayer() : CameraLayer?
+
+    fun getLayerList(): List<BaseLayer>
+
+    fun getViewPortWidth(): Int
+
+    fun getViewPortHeight(): Int
+
+    fun setViewPortSize(width: Int, height: Int)
 }

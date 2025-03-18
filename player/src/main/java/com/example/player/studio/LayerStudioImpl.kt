@@ -7,6 +7,7 @@ import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.os.Handler
 import android.os.Looper
+import android.util.Size
 import com.example.player.BuildConfig
 import com.example.player.gles.GlUtil
 import com.example.player.layer.BaseLayer
@@ -35,6 +36,7 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
     public var context: Context? = null
 
     private var layerList: MutableList<BaseLayer> = mutableListOf()
+    private var needSourLayerList = false
 
     private var previewWidth = 0
     private var previewHeight = 0
@@ -43,24 +45,68 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
 
     private var mainHandler: Handler? = null
 
+    private var viewPortWidth = 0
+    private var viewPortHeight = 0
+
     init {
         if (BuildConfig.DEBUG) {
             Log.setLevel(Log.LEVEL_DEBUG, false)
         }
     }
 
+    private fun sortLayerList() {
+        if (!needSourLayerList) {
+            return
+        }
+//        从小到大排序
+        layerList.sortBy { it.order }
+        needSourLayerList = false
+    }
+
+    private fun addLayerToList(layer: BaseLayer) {
+        synchronized(layerList) {
+            layerList.add(layer)
+        }
+
+        needSourLayerList = true
+        sortLayerList()
+
+    }
+
+    override fun setViewPortSize(width: Int, height: Int) {
+        viewPortWidth = width
+        viewPortHeight = height
+    }
+
+    override fun getViewPortWidth(): Int {
+        return viewPortWidth
+    }
+
+    override fun getViewPortHeight(): Int {
+        return viewPortHeight
+    }
+
     override fun setListener(listener: LayerStudioListener) {
         this.listener = listener
     }
 
-    override fun startPreview(context: Context, surfaceView: GLSurfaceView, actionView: LayerActionLayout?) {
+    override fun getLayerList(): List<BaseLayer> {
+        sortLayerList()
+        return layerList
+    }
+
+    override fun startPreview(context: Context, surfaceView: GLSurfaceView, viewPortSize: Size,
+                              actionView: LayerActionLayout?) {
         this.context = context
         mainHandler = Handler(Looper.getMainLooper())
+
+        setViewPortSize(viewPortSize.width, viewPortSize.height)
 
         render = LayerRender()
         render?.listener = this
         render?.startPreview(surfaceView)
 
+        actionView?.layerStudio = this
         this.actionView = actionView
 //        actionView?.let {
 //            this.actionView = LayerActionLayout(actionView)
@@ -104,9 +150,7 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
         }
         layer.filePath = filePath
         addVideoPlayer(layer)
-        synchronized(layerList) {
-            layerList.add(layer)
-        }
+        addLayerToList(layer)
 
         return layer
     }
@@ -134,9 +178,7 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
             }
         })
 
-        synchronized(layerList) {
-            layerList.add(layer)
-        }
+        addLayerToList(layer)
         return layer
     }
 
@@ -151,9 +193,7 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
             layer.configure()
         }
 
-        synchronized(layerList) {
-            layerList.add(layer)
-        }
+        addLayerToList(layer)
         return layer
     }
 
@@ -231,6 +271,7 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
             return
         }
         synchronized(layerList) {
+            sortLayerList()
             for (layer in layerList) {
                 if (!layer.visible) {
                     continue
