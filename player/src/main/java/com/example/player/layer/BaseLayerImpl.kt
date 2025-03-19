@@ -55,6 +55,9 @@ open class BaseLayerImpl : BaseLayer() {
     internal open fun updateSize(layerWith: Float, layerHeight: Float) {
         width = layerWith
         height = layerHeight
+        if (baseLayerListener != null) {
+            baseLayerListener!!.onSizeChanged()
+        }
     }
 
     open fun updateRotation(rotate: Float) {

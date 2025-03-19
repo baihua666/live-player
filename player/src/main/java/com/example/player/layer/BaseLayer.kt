@@ -3,6 +3,10 @@ package com.example.player.layer
 
 open class BaseLayer {
 
+    interface OnBaseLayerListener {
+        fun onSizeChanged()
+    }
+
     public var layerId:Int = 0
     var order:Int = 0
 
@@ -19,6 +23,12 @@ open class BaseLayer {
     var rotate: Float? = null
 
     var color: Int? = null
+
+    internal var baseLayerListener: OnBaseLayerListener? = null
+
+    fun setOnBaseLayerListener(listener: OnBaseLayerListener) {
+        this.baseLayerListener = listener
+    }
 
     fun getCenterX(): Float {
         return x!! + width!! / 2

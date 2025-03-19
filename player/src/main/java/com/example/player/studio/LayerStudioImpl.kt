@@ -59,7 +59,10 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
             return
         }
 //        从小到大排序
-        layerList.sortBy { it.order }
+        synchronized(layerList) {
+            layerList.sortBy { it.order }
+        }
+
         needSourLayerList = false
     }
 
@@ -108,10 +111,9 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
 
         actionView?.layerStudio = this
         this.actionView = actionView
-//        actionView?.let {
-//            this.actionView = LayerActionLayout(actionView)
-//            this.actionView!!.listener = layerActionListener
-//        }
+        actionView?.let {
+            this.actionView!!.listener = layerActionListener
+        }
     }
 
     override fun stopPreview() {
@@ -148,7 +150,20 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
                 }
             }
         }
+        layer.setOnTextureLayerListener(object : TextureLayer.OnTextureLayerListener {
+            override fun onModelViewMatrixChanged(matrix16Points: FloatArray) {
+                Log.d(TAG, "onModelViewMatrixChanged")
+                //如果有TouchView，则更新TouchView的位置
+                if (actionView?.touchViewLayer() == layer) {
+                    actionView?.touchView?.setModelViewMatrix(matrix16Points)
+                }
+                else {
+                    Log.d(TAG, "onModelViewMatrixChanged, no touch view")
+                }
+            }
+        })
         layer.filePath = filePath
+
         addVideoPlayer(layer)
         addLayerToList(layer)
 

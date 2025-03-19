@@ -104,8 +104,13 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
     }
 
     private fun testRotation() {
-        addImageLayer()
+        addVideoLayer()
         startTimer()
+    }
+
+    private fun testGreenScreen() {
+        addImageLayer()
+//        testLayer?.enableMattingGreen = true
     }
 
 //    @RequiresApi(Build.VERSION_CODES.O)
@@ -127,15 +132,17 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
     }
 
     private fun addVideoLayer() {
-        var filePath: String = FileUtil.copyAssetFileToCache(this, "test1.mp4")
+        var filePath: String = FileUtil.copyAssetFileToCache(this, "test_cat.mp4")
         var layer = layerManager.addVideoLayer(filePath)
-        layerManager.showActionView(layer!!)
+        layer?.x = 0f
+        layer?.y = 0f
 
-//        filePath = FileUtil.copyAssetFileToCache(this, "green_video.mp4")
-        filePath = FileUtil.copyAssetFileToCache(this, "green_test1.mp4")
-
+        filePath = FileUtil.copyAssetFileToCache(this, "green_man.mp4")
         layer = layerManager.addVideoLayer(filePath)
         layer?.enableMattingGreen = true
+        layerManager.showActionView(layer!!)
+
+        testLayer = layer
     }
 
     private fun addImageLayer() {
@@ -172,6 +179,6 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
                 }
                 testLayer?.updateRotation(rotate)
             }
-        }, 100, 5000)
+        }, 100, 1000)
     }
 }

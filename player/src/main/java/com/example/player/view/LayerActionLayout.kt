@@ -11,6 +11,7 @@ import android.widget.RelativeLayout
 import com.example.player.layer.BaseLayer
 import com.example.player.layer.BaseLayerImpl
 import com.example.player.layer.TextureLayer
+import com.example.player.layer.VideoLayer
 import com.example.player.studio.LayerStudio
 import com.example.player.util.LayerMatrixUti
 import com.tencent.mars.xlog.Log
@@ -21,7 +22,7 @@ class LayerActionLayout: FrameLayout, StickerView.OperationListener {
 
 //    private var frameLayout: FrameLayout
 
-    var inEditView: StickerView? = null
+    var stickerView: StickerView? = null
 
     var touchView: TouchView? = null
 
@@ -36,8 +37,8 @@ class LayerActionLayout: FrameLayout, StickerView.OperationListener {
 
 
     private fun stickerViewLayer() : BaseLayerImpl? {
-        if (this.inEditView != null) {
-            return this.inEditView!!.tag as BaseLayerImpl
+        if (this.stickerView != null) {
+            return this.stickerView!!.tag as BaseLayerImpl
         }
 
         return null
@@ -50,24 +51,33 @@ class LayerActionLayout: FrameLayout, StickerView.OperationListener {
         return null
     }
 
+    private fun actionView() : View? {
+        return touchView?: stickerView
+    }
+
     fun actionViewLayer() : BaseLayerImpl? {
         return stickerViewLayer()?: touchViewLayer()
     }
 
     fun showActionView(layer: BaseLayer) {
-//        showStickerView(layer)
-        showTouchView(layer)
+//        if (layer is VideoLayer) {
+//            showStickerView(layer)
+//        }
+//        else {
+            showTouchView(layer)
+//        }
     }
 
     private fun getActionView() : View? {
-        return inEditView ?: touchView
+        return stickerView ?: touchView
     }
 
     private fun showStickerView(layer: BaseLayer) {
-        if (this.inEditView != null) {
-            this.inEditView!!.setInEdit(false)
-            removeView(this.inEditView!!)
-            this.inEditView = null
+        if (this.actionView() != null) {
+            if (this.actionViewLayer() == layer) {
+                return
+            }
+            releaseActionView()
         }
         val view = StickerView(context)
         view.setEnableRotate(false)
@@ -86,10 +96,16 @@ class LayerActionLayout: FrameLayout, StickerView.OperationListener {
         view.posX = (layer.x ?: 0).toFloat()
         view.posY = (layer.y ?: 0).toFloat()
 
-        if (layer.width != null && layer.height != null) {
-            val bitmap = Bitmap.createBitmap(layer.width?.toInt() ?: 0, layer.height?.toInt() ?: 0, Bitmap.Config.ARGB_8888)
-            view.bitmap = bitmap
-        }
+
+        layer.setOnBaseLayerListener(object : BaseLayer.OnBaseLayerListener {
+            override fun onSizeChanged() {
+                if (layer.width != null && layer.height != null) {
+                    val bitmap = Bitmap.createBitmap(layer.width?.toInt() ?: 0, layer.height?.toInt() ?: 0, Bitmap.Config.ARGB_8888)
+                    view.bitmap = bitmap
+                }
+
+            }
+        })
 
 //        debug
 //        val canvas = Canvas(bitmap)
@@ -98,14 +114,15 @@ class LayerActionLayout: FrameLayout, StickerView.OperationListener {
 //        view.background = ColorDrawable(0x00000066.toInt());
 
 
-        this.inEditView = view
+        this.stickerView = view
     }
 
     private fun showTouchView(layer: BaseLayer) {
-        if (this.touchView != null) {
-            this.touchView!!.setInEdit(false)
-            removeView(this.touchView!!)
-            this.touchView = null
+        if (this.actionView() != null) {
+            if (actionViewLayer()== layer) {
+                return
+            }
+            releaseActionView()
         }
         Log.d(TAG, "showTouchView:%d", layer.layerId)
         val view = TouchView(context)
@@ -120,7 +137,9 @@ class LayerActionLayout: FrameLayout, StickerView.OperationListener {
                 Log.d(TAG, "showTouchView:matrix is null")
             }
             view.setModelViewMatrix(layer.getMatrix())
+
         }
+        view.setIsMirrorY(layer is VideoLayer)
 //        view.setOperationListener(this)
 //        view.setParentSize(frameLayout.width, frameLayout.height)
 
@@ -152,7 +171,7 @@ class LayerActionLayout: FrameLayout, StickerView.OperationListener {
                 }
 
                 override fun onRotate(touchView: TouchView?, degrees: Float, px: Float, py: Float) {
-                    if (layer is TextureLayer) {
+                    if (layer is TextureLayer && layer.rotate != null) {
                         layer.updateRotation(layer.rotate!! - degrees)
                     }
                     listener?.onLayerActionViewRotate(touchViewLayer()!!, degrees, px, py)
@@ -178,10 +197,10 @@ class LayerActionLayout: FrameLayout, StickerView.OperationListener {
     }
 
     private fun releaseActionView() {
-        if (this.inEditView != null) {
-            this.inEditView!!.setInEdit(false)
-            removeView(this.inEditView!!)
-            this.inEditView = null
+        if (this.stickerView != null) {
+            this.stickerView!!.setInEdit(false)
+            removeView(this.stickerView!!)
+            this.stickerView = null
         }
         if (this.touchView != null) {
             this.touchView!!.setInEdit(false)
@@ -201,16 +220,16 @@ class LayerActionLayout: FrameLayout, StickerView.OperationListener {
     }
 
     override fun onEdit(stickerView: StickerView?) {
-        if (stickerView == inEditView) {
+        if (stickerView == this.stickerView) {
             return
         }
         val layer: BaseLayerImpl = stickerView!!.tag as BaseLayerImpl
         Log.d(TAG, "onEdit:%d", layer.layerId)
-        if (inEditView != null) {
-            inEditView!!.setInEdit(false)
+        if (this.stickerView != null) {
+            this.stickerView!!.setInEdit(false)
         }
-        inEditView = stickerView
-        inEditView!!.setInEdit(true)
+        this.stickerView = stickerView
+        this.stickerView!!.setInEdit(true)
     }
 
     override fun onTop(stickerView: StickerView?) {
@@ -311,7 +330,7 @@ class LayerActionLayout: FrameLayout, StickerView.OperationListener {
             return false
         }
 
-        val corners = LayerMatrixUti.matrixToCorners(layer.getMatrix()!!, height.toFloat())
+        val corners = LayerMatrixUti.matrixToCorners(layer.getMatrix()!!, height.toFloat(), layer is VideoLayer)
         return LayerMatrixUti.isPointInCornersRect(x, y, corners)
     }
 

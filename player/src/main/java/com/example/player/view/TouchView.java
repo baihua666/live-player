@@ -101,6 +101,9 @@ public class TouchView extends View implements BaseTouchView {
     private float lastRotateDegree;
     private double halfDiagonalLength;
 
+    private boolean mirrorY = false;
+
+
 
     private OperationListener operationListener;
 
@@ -134,6 +137,9 @@ public class TouchView extends View implements BaseTouchView {
 //        mLayerHeight = height;
 //    }
 
+    public void setIsMirrorY(boolean isMirrorY) {
+        this.mirrorY = isMirrorY;
+    }
 
     private void init() {
         localPaint = new Paint();
@@ -168,10 +174,10 @@ public class TouchView extends View implements BaseTouchView {
     }
 
     private boolean updateCorners() {
-        if (viewHeight == 0) {
+        if (mModelViewMatrix == null || viewHeight == 0) {
             return false;
         }
-        transformedCorners = LayerMatrixUti.INSTANCE.matrixToCorners(mModelViewMatrix, viewHeight);
+        transformedCorners = LayerMatrixUti.INSTANCE.matrixToCorners(mModelViewMatrix, viewHeight, mirrorY);
 
         float centerX = (transformedCorners[0] + transformedCorners[2]) / 2;
         float centerY = (transformedCorners[1] + transformedCorners[3]) / 2;

@@ -1,8 +1,6 @@
 package com.example.player.layer
 
 import android.content.Context
-import com.example.player.gles.Drawable2d
-import com.example.player.gles.Drawable2dTarget
 import com.example.player.ijkplayer.IjkVideoContainer
 import tv.danmaku.ijk.media.player.filter.IjkFilter
 
@@ -23,10 +21,10 @@ open class VideoLayer : TextureLayer() {
         videoView?.setMattingGreenEnabled(true)
         videoView?.setFilter(object : IjkFilter {
             override fun onCreated() {
-                val drawable2d = Drawable2d(Drawable2d.Prefab.RECTANGLE)
-                targetDrawable = Drawable2dTarget(drawable2d)
-                //视频是反的？先特殊处理一下
-                targetDrawable?.isMirrorY = true
+//                val drawable2d = Drawable2d(Drawable2d.Prefab.RECTANGLE)
+//                targetDrawable = Drawable2dTarget(drawable2d)
+//                //视频是反的？先特殊处理一下
+//                targetDrawable?.isMirrorY = true
 
             }
 
@@ -39,7 +37,9 @@ open class VideoLayer : TextureLayer() {
 //                }
 
                 updateSize(width.toFloat(), height.toFloat())
-                updateCenterPosition(previewWidth / 2.0f, previewHeight / 2.0f)
+                if (x == null || y == null) {
+                    updateCenterPosition(previewWidth / 2.0f, previewHeight / 2.0f)
+                }
                 checkContentRectReady()
 
 
@@ -47,7 +47,14 @@ open class VideoLayer : TextureLayer() {
             }
 
             override fun onDrawFrame(textureId: Int): Int {
-                targetDrawable?.setTexture(textureId)
+                if (targetDrawable == null) {
+                    configure(textureId)
+                    //视频是反的？先特殊处理一下
+                    targetDrawable?.isMirrorY = true
+                }
+                else {
+                    targetDrawable?.setTexture(textureId)
+                }
                 return 0
             }
 

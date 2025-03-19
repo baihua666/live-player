@@ -8,7 +8,8 @@ object LayerMatrixUti {
 
     // 计算四个顶点的坐标
     // 矩阵坐标是以左下角为原点的，需要转换为以左上角为原点的坐标
-    fun matrixToCorners(modelViewMatrix: FloatArray, viewHeight: Float): FloatArray {
+//    isMirrorY:是否需要镜像Y轴
+    fun matrixToCorners(modelViewMatrix: FloatArray, viewHeight: Float, isMirrorY: Boolean): FloatArray {
         // 定义四个顶点的坐标
         val coordinate = floatArrayOf(
             -0.5f, -0.5f,
@@ -35,7 +36,10 @@ object LayerMatrixUti {
                 modelViewMatrix[1] * x + modelViewMatrix[5] * y + centerY
             corners[j + 1] = viewHeight - corners[j + 1]
         }
-        fixCoordinate(corners)
+        if (!isMirrorY) {
+            fixCoordinate(corners)
+        }
+
         return corners
     }
 
