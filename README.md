@@ -4,7 +4,7 @@
 
 
 ## 演示
-![演示](readme_res/demo.gif)
+![演示](https://github.com/baihua666/live-player/blob/master/readme_res/demo.gif?raw=true)
 
 ## 功能特性
 - **多视频播放**：使用ijkplayer，修改后支持多个视频在同一个视图内播放，以插件形式支持绿幕抠图，可以扩展支持其它类型滤镜。
