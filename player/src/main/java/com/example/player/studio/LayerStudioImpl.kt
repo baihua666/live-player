@@ -48,14 +48,16 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
     private var viewPortWidth = 0
     private var viewPortHeight = 0
 
+    private var enableOutput = false
+
     init {
         if (BuildConfig.DEBUG) {
             Log.setLevel(Log.LEVEL_DEBUG, false)
         }
     }
 
-    private fun sortLayerList() {
-        if (!needSourLayerList) {
+    private fun sortLayerList(force: Boolean = false) {
+        if (!needSourLayerList &&!force) {
             return
         }
 //        从小到大排序
@@ -68,17 +70,37 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
 
     private fun addLayerToList(layer: BaseLayer) {
         synchronized(layerList) {
+//            放在最上层显示
+            if (layerList.isNotEmpty()) {
+                layer.order = layerList.last().order + 1
+            }
+
             layerList.add(layer)
         }
-
-        needSourLayerList = true
-        sortLayerList()
-
     }
 
     override fun setViewPortSize(width: Int, height: Int) {
         viewPortWidth = width
         viewPortHeight = height
+    }
+
+    override fun bringToFront(layer: BaseLayer) {
+        //找到order最大的layer，把当前layer的order设置为最大的order+1
+        sortLayerList(force = true)
+        synchronized(layerList) {
+            // 如果当前layer已经是最后一个layer，则不需要改变order
+            if (layerList.last() == layer) {
+                //如果有和当前layer id一样的layer，则把当前layer的order设置为最后一个layer的order+1
+                if (layerList.count() >= 2 && layerList[layerList.count() - 2].order == layer.order) {
+                    layer.order += 1
+                }
+            }
+            else {
+                //重新排序
+                layer.order = layerList.last().order + 1
+                sortLayerList(force = true)
+            }
+        }
     }
 
     override fun getViewPortWidth(): Int {
@@ -116,6 +138,10 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
         }
     }
 
+    override fun enableOutput(enable: Boolean) {
+        enableOutput = enable
+    }
+
     override fun stopPreview() {
         render?.stopPreview()
     }
@@ -136,7 +162,15 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
     }
 
     override fun addVideoLayer(filePath: String): VideoLayer? {
-        if (!File(filePath).exists()) {
+        return addVideoLayer(filePath, null)
+    }
+
+    override fun addVideoUrlLayer(url: String): VideoLayer? {
+        return addVideoLayer(null, url)
+    }
+
+    private fun addVideoLayer(filePath: String?, url: String?): VideoLayer? {
+        if (!filePath.isNullOrEmpty() && !File(filePath).exists()) {
             assert(false) { "File not found: $filePath" }
             return null
         }
@@ -162,7 +196,12 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
                 }
             }
         })
-        layer.filePath = filePath
+        if (!filePath.isNullOrEmpty()) {
+            layer.filePath = filePath
+        }
+        else if (!url.isNullOrEmpty()) {
+            layer.url = url
+        }
 
         addVideoPlayer(layer)
         addLayerToList(layer)
@@ -295,7 +334,11 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
                     drawTextureLayer(layer)
                 }
             }
-            readPixels()
+            if(listener != null && enableOutput) {
+                val bmp = readPixels()
+                listener?.onDrawFrame(bmp)
+            }
+
         }
 
 
@@ -317,7 +360,8 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
         }
     }
 
-    private fun readPixels() {
+//    debug only
+    private fun readPixels() : Bitmap {
         val width: Int = previewWidth
         val height: Int = previewHeight
         val buf = ByteBuffer.allocateDirect(width * height * 4)
@@ -340,11 +384,11 @@ class LayerStudioImpl : LayerStudio, GLSurfaceView.Renderer {
 
         val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         bmp.copyPixelsFromBuffer(buf)
-        bmp.recycle()
+//        bmp.recycle()
 
         GlUtil.checkGlError("glReadPixels")
         buf.rewind()
 
-
+        return bmp
     }
 }

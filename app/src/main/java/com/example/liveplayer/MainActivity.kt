@@ -1,5 +1,6 @@
 package com.example.liveplayer
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.opengl.GLSurfaceView
@@ -10,6 +11,7 @@ import android.view.Gravity
 import android.widget.Button
 import android.widget.GridLayout
 import android.widget.GridView
+import android.widget.ImageView
 import android.widget.SimpleAdapter
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -39,6 +41,7 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
     private lateinit var adapter: SimpleAdapter
 
     private lateinit var gridLayout: GridLayout
+    private lateinit var outputView: ImageView
 
 
     private val dataList = ArrayList<Map<String, Any>>()
@@ -52,6 +55,7 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        outputView = findViewById(R.id.iv_output)
         initPlayer()
     }
 
@@ -62,10 +66,19 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
     }
 
     private fun addTestButtons() {
-        var hashMap : HashMap<String, Any>
-                = HashMap()
+        var hashMap : HashMap<String, Any> = HashMap()
+        hashMap["text"] = "background color"
+        hashMap["action"] = { testBackgroundColor() }
+        dataList.add(hashMap)
+
+        hashMap = HashMap()
         hashMap["text"] = "Video"
         hashMap["action"] = { testVideo() }
+        dataList.add(hashMap)
+
+        hashMap = HashMap()
+        hashMap["text"] = "Online Video"
+        hashMap["action"] = { testOnlineVideo() }
         dataList.add(hashMap)
 
         hashMap= HashMap()
@@ -76,6 +89,11 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
         hashMap= HashMap()
         hashMap["text"] = "Rotation"
         hashMap["action"] = { testRotation() }
+        dataList.add(hashMap)
+
+        hashMap= HashMap()
+        hashMap["text"] = "Output"
+        hashMap["action"] = { testOutput() }
         dataList.add(hashMap)
 
         gridLayout = findViewById(R.id.gl_test_view)
@@ -95,8 +113,21 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
         }
     }
 
+    private fun testBackgroundColor() {
+        val color:Color = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Color.valueOf(1.0f, 0.0f, 0.0f, 0.1f)
+        } else {
+            TODO("VERSION.SDK_INT < O")
+        }
+        layerManager.setBackgroundColor(color)
+    }
+
     private fun testVideo() {
-        addVideoLayer()
+        addVideoLayer(false)
+    }
+
+    private fun testOnlineVideo() {
+        addVideoLayer(true)
     }
 
     private fun testImage() {
@@ -104,8 +135,12 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
     }
 
     private fun testRotation() {
-        addVideoLayer()
+        addVideoLayer(false)
         startTimer()
+    }
+
+    private fun testOutput() {
+        layerManager.enableOutput(true)
     }
 
     private fun testGreenScreen() {
@@ -122,16 +157,20 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
         actionView = findViewById(R.id.layer_studio_view)
         layerManager.startPreview(this, glSurfaceView, Size(1080, 1920), actionView)
 
+
         val color:Color = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Color.valueOf(1.0f, 0.0f, 0.0f, 0.1f)
+            Color.valueOf(1.0f, 1.0f, 1.0f, 1.0f)
         } else {
             TODO("VERSION.SDK_INT < O")
         }
         layerManager.setBackgroundColor(color)
-
     }
 
-    private fun addVideoLayer() {
+    private fun addVideoLayer(isOnline: Boolean) {
+        if (isOnline) {
+            testLayer = layerManager.addVideoUrlLayer("http://vjs.zencdn.net/v/oceans.mp4")
+            return
+        }
         var filePath: String = FileUtil.copyAssetFileToCache(this, "test_cat.mp4")
         var layer = layerManager.addVideoLayer(filePath)
         layer?.x = 0f
@@ -147,10 +186,10 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
 
     private fun addImageLayer() {
         val bitmap = BitmapFactory.decodeResource(
-            resources, R.drawable.test
+            resources, R.drawable.test_ic_launcher
         )
         testLayer = layerManager.addBitmapLayer(bitmap)
-        testLayer?.color = Color.argb(255, 0, 250, 0)
+        testLayer?.color = Color.argb(0, 0, 0, 0)
         testLayer?.rotate = 10f
         testLayer?.x = 50.0f
         testLayer?.y = 100.0f
@@ -166,6 +205,13 @@ class MainActivity : AppCompatActivity(), LayerStudioListener {
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
+
+    }
+
+    override fun onDrawFrame(bitmap: Bitmap) {
+        GlobalScope.launch(Dispatchers.Main) {
+            outputView.setImageBitmap(bitmap)
+        }
 
     }
 

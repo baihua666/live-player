@@ -21,6 +21,10 @@ class LayerManager {
         layerStudio.setListener(listener)
     }
 
+    fun enableOutput(enable: Boolean) {
+        layerStudio.enableOutput(enable)
+    }
+
     public fun startPreview(context: Context, surfaceView: GLSurfaceView, viewPortSize: Size, actionView: LayerActionLayout?) {
         layerStudio.startPreview(context, surfaceView, viewPortSize, actionView)
     }
@@ -43,6 +47,10 @@ class LayerManager {
 
     fun addVideoLayer(filePath: String): VideoLayer? {
         return layerStudio.addVideoLayer(filePath)
+    }
+
+    fun addVideoUrlLayer(url: String): VideoLayer? {
+        return layerStudio.addVideoUrlLayer(url)
     }
 
 }

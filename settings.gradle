@@ -31,4 +31,4 @@ include ':player'
 
 include 'A4ijkplayer'
 
-project(':A4ijkplayer').projectDir = new File('../../github/ijk/A4ijkplayer/A4ijkplayer')
+project(':A4ijkplayer').projectDir = new File('./EffectIjkplayer/A4ijkplayer')

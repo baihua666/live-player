@@ -1,11 +1,13 @@
 package com.example.player.layer
 
 import android.content.Context
+import android.net.Uri
 import com.example.player.ijkplayer.IjkVideoContainer
 import tv.danmaku.ijk.media.player.filter.IjkFilter
 
 open class VideoLayer : TextureLayer() {
     var filePath:String? = null
+    var url: String? = null
 
     private var videoView: IjkVideoContainer? = null
 
@@ -17,7 +19,14 @@ open class VideoLayer : TextureLayer() {
 
     fun addPlayer(context: Context, previewWidth: Int, previewHeight: Int) {
         videoView = IjkVideoContainer(context)
-        videoView?.setVideoPath(filePath)
+        if (filePath != null && filePath!!.isNotEmpty()) {
+            videoView?.setVideoPath(filePath)
+        }
+        else if (url != null && url!!.isNotEmpty()) {
+            videoView?.setVideoURI(Uri.parse(url))
+        }
+
+
         videoView?.setMattingGreenEnabled(true)
         videoView?.setFilter(object : IjkFilter {
             override fun onCreated() {

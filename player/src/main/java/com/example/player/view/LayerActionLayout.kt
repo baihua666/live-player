@@ -68,6 +68,10 @@ class LayerActionLayout: FrameLayout, StickerView.OperationListener {
 //        }
     }
 
+    private fun bringToFront(layer: BaseLayer) {
+        layerStudio.bringToFront(layer)
+    }
+
     private fun getActionView() : View? {
         return stickerView ?: touchView
     }
@@ -284,6 +288,9 @@ class LayerActionLayout: FrameLayout, StickerView.OperationListener {
     //        如果当前有显示的操作视图,并且是在视图上，是不会触发onTouchEvent的
     override fun onTouchEvent(event: MotionEvent): Boolean {
         var handled = super.onTouchEvent(event)
+        if (event.action != MotionEvent.ACTION_DOWN) {
+            return handled
+        }
         //如果有已经在编辑的视图，取消编辑
         val actionView = getActionView()
         if (actionView != null) {
@@ -297,6 +304,7 @@ class LayerActionLayout: FrameLayout, StickerView.OperationListener {
             val x = event.x
             val y = event.y
             if (isPointInLayer(x, y, layer)) {
+                bringToFront(layer)
                 showActionView(layer)
                 handled = true
                 break

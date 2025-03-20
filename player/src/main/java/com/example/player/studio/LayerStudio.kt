@@ -25,7 +25,9 @@ interface LayerStudio {
     fun setListener(listener: LayerStudioListener)
 
     fun startPreview(context: Context, surfaceView: GLSurfaceView, viewPortSize: Size, actionView: LayerActionLayout?)
-//
+
+    fun enableOutput(enable: Boolean)
+
     fun stopPreview()
 //
 //    /**
@@ -54,6 +56,8 @@ interface LayerStudio {
     fun addBitmapLayer(bitmap: Bitmap) : BitmapLayer?
 //
     fun addVideoLayer(filePath: String) : VideoLayer?
+
+    fun addVideoUrlLayer(url: String) : VideoLayer?
 //
 //    open fun addCameraLayer() : CameraLayer?
 
@@ -64,4 +68,6 @@ interface LayerStudio {
     fun getViewPortHeight(): Int
 
     fun setViewPortSize(width: Int, height: Int)
+
+    fun bringToFront(layer: BaseLayer)
 }
